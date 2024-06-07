@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vendor Management</title>
+    <script>
+        async function fetchVendors() {
+            const response = await fetch('/api/vendors/');
+            const vendors = await response.json();
+            const vendorList = document.getElementById('vendor-list');
+            vendorList.innerHTML = '';
+            vendors.forEach(vendor => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    ${vendor.name} - ${vendor.email} - ${vendor.phone} - ${vendor.address}
+                    <button onclick="deleteVendor(${vendor.id})">Delete</button>
+                    <button onclick="editVendor(${vendor.id})">Edit</button>
+                `;
+                vendorList.appendChild(listItem);
+            });
+        }
+
+        async function addVendor() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+
+            await fetch('/api/vendors/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, email, phone, address })
+            });
+
+            fetchVendors();
+        }
+
+        async function deleteVendor(id) {
+            await fetch(`/api/vendors/${id}/`, {
+                method: 'DELETE'
+            });
+            fetchVendors();
+        }
+
+        async function editVendor(id) {
+            const name = prompt("Enter new name:");
+            const email = prompt("Enter new email:");
+            const phone = prompt("Enter new phone:");
+            const address = prompt("Enter new address:");
+
+            await fetch(`/api/vendors/${id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, email, phone, address })
+            });
+
+            fetchVendors();
+        }
+
+        window.onload = fetchVendors;
+    </script>
+</head>
+<body>
+    <h1>Vendor Management</h1>
+    <ul id="vendor-list"></ul>
+
+    <h2>Add Vendor</h2>
+    <form onsubmit="event.preventDefault(); addVendor();">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+        <br>
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" required>
+        <br>
+        <label for="address">Address:</label>
+        <textarea id="address" required></textarea>
+        <br>
+        <button type="submit">Add Vendor</button>
+    </form>
+</body>
+</html>
